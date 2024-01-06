@@ -66,13 +66,13 @@ impl<T, const D0: usize, const D1: usize, B: Backend<T>> Tensor for Matrix<T, D0
     }
 }
 
-impl<T, const D0: usize, const D1: usize, B: Backend<T>> Add<Scalar<B, T>> for Matrix<T, D0, D1, B>
+impl<T, const D0: usize, const D1: usize, B: Backend<T>> Add<Scalar<T, B>> for Matrix<T, D0, D1, B>
 where
     T: Add<Output = T> + Copy,
 {
     type Output = Self;
 
-    fn add(self, other: Scalar<B, T>) -> Self {
+    fn add(self, other: Scalar<T, B>) -> Self {
         Self {
             repr: B::matrix_scalar_add(self.repr, other.repr),
             shape: self.shape,
