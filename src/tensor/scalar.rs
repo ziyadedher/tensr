@@ -3,12 +3,12 @@ use std::ops::Add;
 use crate::{backend::Backend, tensor::Tensor};
 
 #[derive(Clone, Debug)]
-pub struct Scalar<B: Backend<T>, T> {
+pub struct Scalar<T, B: Backend<T>> {
     pub(crate) repr: B::ScalarRepr,
-    pub(crate) shape: <Scalar<B, T> as Tensor>::Shape,
+    pub(crate) shape: <Scalar<T, B> as Tensor>::Shape,
 }
 
-impl<B: Backend<T>, T> Tensor for Scalar<B, T> {
+impl<T, B: Backend<T>> Tensor for Scalar<T, B> {
     type Shape = ();
     type DataType = T;
 
@@ -37,7 +37,7 @@ impl<B: Backend<T>, T> Tensor for Scalar<B, T> {
     }
 }
 
-impl<B: Backend<T>, T> Add for Scalar<B, T>
+impl<T, B: Backend<T>> Add for Scalar<T, B>
 where
     T: Add<Output = T>,
 {
