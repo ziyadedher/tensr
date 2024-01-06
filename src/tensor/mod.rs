@@ -1,10 +1,12 @@
 pub mod tensor0;
 pub mod tensor1;
 pub mod tensor2;
+pub mod tensor3;
 
 pub use tensor0::Tensor0 as Scalar;
 pub use tensor1::Tensor1 as Vector;
 pub use tensor2::Tensor2 as Matrix;
+pub use tensor3::Tensor3;
 
 pub trait Tensor {
     type Shape;

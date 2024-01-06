@@ -12,6 +12,7 @@ pub trait Backend<T> {
     type T0Repr;
     type T1Repr;
     type T2Repr;
+    type T3Repr;
 
     fn t0_zero() -> Self::T0Repr
     where
@@ -31,11 +32,23 @@ pub trait Backend<T> {
     fn t2_ones(d0: Self::Index, d1: Self::Index) -> Self::T2Repr
     where
         T: From<u8> + Copy;
-    fn t2_identity(d: Self::Index) -> Self::T2Repr
+    fn t3_ones(d0: Self::Index, d1: Self::Index, d2: Self::Index) -> Self::T3Repr
+    where
+        T: From<u8> + Copy;
+    fn t3_zeros(d0: Self::Index, d1: Self::Index, d2: Self::Index) -> Self::T3Repr
     where
         T: From<u8> + Copy;
 
+    fn t2_identity(d: Self::Index) -> Self::T2Repr
+    where
+        T: From<u8> + Copy;
     fn t2_transpose(a: Self::T2Repr) -> Self::T2Repr
+    where
+        T: From<u8> + Copy;
+    fn t3_permute(
+        a: Self::T3Repr,
+        p: (Self::Dimension, Self::Dimension, Self::Dimension),
+    ) -> Self::T3Repr
     where
         T: From<u8> + Copy;
 

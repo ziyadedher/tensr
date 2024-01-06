@@ -11,6 +11,7 @@ impl<T: Clone> BackendTrait<T> for Backend {
     type T0Repr = T;
     type T1Repr = Vec<T>;
     type T2Repr = Vec<Vec<T>>;
+    type T3Repr = Vec<Vec<Vec<T>>>;
 
     fn t0_zero() -> Self::T0Repr
     where
@@ -54,6 +55,31 @@ impl<T: Clone> BackendTrait<T> for Backend {
         vec![vec![1.into(); d1]; d0]
     }
 
+    fn t3_zeros(d0: usize, d1: usize, d2: usize) -> Self::T3Repr
+    where
+        T: From<u8> + Copy,
+    {
+        vec![vec![vec![0.into(); d2]; d1]; d0]
+    }
+
+    fn t3_ones(d0: Self::Index, d1: Self::Index, d2: Self::Index) -> Self::T3Repr
+    where
+        T: From<u8> + Copy,
+    {
+        vec![vec![vec![1.into(); d2]; d1]; d0]
+    }
+
+    fn t2_identity(d: usize) -> Self::T2Repr
+    where
+        T: From<u8> + Copy,
+    {
+        let mut matrix = Self::t2_zeros(d, d);
+        for i in 0..d {
+            matrix[i][i] = 1.into();
+        }
+        matrix
+    }
+
     fn t2_transpose(a: Self::T2Repr) -> Self::T2Repr
     where
         T: From<u8> + Copy,
@@ -67,15 +93,26 @@ impl<T: Clone> BackendTrait<T> for Backend {
         result
     }
 
-    fn t2_identity(d: usize) -> Self::T2Repr
+    fn t3_permute(
+        a: Self::T3Repr,
+        p: (Self::Dimension, Self::Dimension, Self::Dimension),
+    ) -> Self::T3Repr
     where
         T: From<u8> + Copy,
     {
-        let mut matrix = Self::t2_zeros(d, d);
-        for i in 0..d {
-            matrix[i][i] = 1.into();
+        let d = [a.len(), a[0].len(), a[0][0].len()];
+        let (pd0, pd1, pd2) = (d[p.0], d[p.1], d[p.2]);
+        let mut result = Self::t3_zeros(pd0, pd1, pd2);
+        for i in 0..a.len() {
+            for j in 0..a[0].len() {
+                for k in 0..a[0][0].len() {
+                    let idx = [i, j, k];
+                    let (pi, pj, pk) = (idx[p.0], idx[p.1], idx[p.2]);
+                    result[pi][pj][pk] = a[i][j][k];
+                }
+            }
         }
-        matrix
+        result
     }
 
     fn t0_t0_add(a: Self::T0Repr, b: Self::T0Repr) -> Self::T0Repr
@@ -179,59 +216,106 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_scalar_zero() {
+    fn test_t0_zero() {
         let zero: u8 = Backend::t0_zero();
         assert_eq!(zero, 0);
     }
 
     #[test]
-    fn test_scalar_one() {
+    fn test_t0_one() {
         let one: u8 = Backend::t0_one();
         assert_eq!(one, 1);
     }
 
     #[test]
-    fn test_vector_zeros() {
+    fn test_t1_zeros() {
         let zeros: Vec<u8> = Backend::t1_zeros(3);
         assert_eq!(zeros, vec![0, 0, 0]);
     }
 
     #[test]
-    fn test_vector_ones() {
+    fn test_t1_ones() {
         let ones: Vec<u8> = Backend::t1_ones(3);
         assert_eq!(ones, vec![1, 1, 1]);
     }
 
     #[test]
-    fn test_matrix_zeros() {
-        let zeros: Vec<Vec<u8>> = Backend::t2_zeros(3, 3);
-        assert_eq!(zeros, vec![vec![0, 0, 0], vec![0, 0, 0], vec![0, 0, 0]]);
+    fn test_t2_zeros() {
+        let zeros: Vec<Vec<u8>> = Backend::t2_zeros(2, 3);
+        assert_eq!(zeros, vec![vec![0, 0, 0], vec![0, 0, 0]]);
     }
 
     #[test]
-    fn test_matrix_ones() {
-        let ones: Vec<Vec<u8>> = Backend::t2_ones(3, 3);
-        assert_eq!(ones, vec![vec![1, 1, 1], vec![1, 1, 1], vec![1, 1, 1]]);
+    fn test_t2_ones() {
+        let ones: Vec<Vec<u8>> = Backend::t2_ones(2, 3);
+        assert_eq!(ones, vec![vec![1, 1, 1], vec![1, 1, 1]]);
     }
 
     #[test]
-    fn test_matrix_identity() {
+    fn test_t3_zeros() {
+        let zeros: Vec<Vec<Vec<u8>>> = Backend::t3_zeros(2, 3, 4);
+        assert_eq!(
+            zeros,
+            vec![
+                vec![vec![0, 0, 0, 0], vec![0, 0, 0, 0], vec![0, 0, 0, 0]],
+                vec![vec![0, 0, 0, 0], vec![0, 0, 0, 0], vec![0, 0, 0, 0]]
+            ]
+        );
+    }
+
+    #[test]
+    fn test_t3_ones() {
+        let ones: Vec<Vec<Vec<u8>>> = Backend::t3_ones(2, 3, 4);
+        assert_eq!(
+            ones,
+            vec![
+                vec![vec![1, 1, 1, 1], vec![1, 1, 1, 1], vec![1, 1, 1, 1]],
+                vec![vec![1, 1, 1, 1], vec![1, 1, 1, 1], vec![1, 1, 1, 1]]
+            ]
+        );
+    }
+
+    #[test]
+    fn test_t2_identity() {
         let eye: Vec<Vec<u8>> = Backend::t2_identity(3);
         assert_eq!(eye, vec![vec![1, 0, 0], vec![0, 1, 0], vec![0, 0, 1]]);
     }
 
     #[test]
-    fn test_scalar_scalar_add() {
+    fn test_t2_transpose() {
+        assert_eq!(
+            Backend::t2_transpose(vec![vec![1, 2, 3], vec![4, 5, 6]]),
+            vec![vec![1, 4], vec![2, 5], vec![3, 6]]
+        );
+    }
+
+    #[test]
+    fn test_t3_permute() {
+        let input = vec![
+            vec![vec![1, 2, 3], vec![4, 5, 6], vec![7, 8, 9]],
+            vec![vec![10, 11, 12], vec![13, 14, 15], vec![16, 17, 18]],
+        ];
+        let permuted = Backend::t3_permute(input, (2, 0, 1));
+        let expected = vec![
+            vec![vec![1, 4, 7], vec![10, 13, 16]],
+            vec![vec![2, 5, 8], vec![11, 14, 17]],
+            vec![vec![3, 6, 9], vec![12, 15, 18]],
+        ];
+        assert_eq!(permuted, expected);
+    }
+
+    #[test]
+    fn test_t0_t0_add() {
         assert_eq!(Backend::t0_t0_add(1, 2), 3);
     }
 
     #[test]
-    fn test_vector_scalar_add() {
+    fn test_t1_t0_add() {
         assert_eq!(Backend::t1_t0_add(vec![1, 2, 3], 2), vec![3, 4, 5]);
     }
 
     #[test]
-    fn test_vector_vector_add() {
+    fn test_t1_t1_add() {
         assert_eq!(
             Backend::t1_t1_add(vec![1, 2, 3], vec![4, 5, 6]),
             vec![5, 7, 9]
@@ -239,7 +323,7 @@ mod tests {
     }
 
     #[test]
-    fn test_matrix_scalar_add() {
+    fn test_t2_t0_add() {
         assert_eq!(
             Backend::t2_t0_add(vec![vec![1, 2, 3], vec![4, 5, 6]], 2),
             vec![vec![3, 4, 5], vec![6, 7, 8]]
@@ -247,7 +331,7 @@ mod tests {
     }
 
     #[test]
-    fn test_matrix_vector_add_along_0() {
+    fn test_t2_t1_add_along_0() {
         assert_eq!(
             Backend::t2_t1_add(vec![vec![1, 2, 3], vec![4, 5, 6]], vec![2, 3], 0),
             vec![vec![3, 4, 5], vec![7, 8, 9]]
@@ -255,7 +339,7 @@ mod tests {
     }
 
     #[test]
-    fn test_matrix_vector_add_along_1() {
+    fn test_t2_t1_add_along_1() {
         assert_eq!(
             Backend::t2_t1_add(vec![vec![1, 2, 3], vec![4, 5, 6]], vec![2, 3, 4], 1),
             vec![vec![3, 5, 7], vec![6, 8, 10]]
@@ -263,7 +347,7 @@ mod tests {
     }
 
     #[test]
-    fn test_matrix_matrix_add() {
+    fn test_t2_t2_add() {
         assert_eq!(
             Backend::t2_t2_add(
                 vec![vec![1, 2, 3], vec![4, 5, 6]],
@@ -274,12 +358,12 @@ mod tests {
     }
 
     #[test]
-    fn test_dot() {
+    fn test_t1_t1_dot() {
         assert_eq!(Backend::t1_t1_dot(vec![1, 2, 3], vec![4, 5, 6]), 32);
     }
 
     #[test]
-    fn test_matmul() {
+    fn test_t2_t2_matmul() {
         assert_eq!(
             Backend::t2_t2_matmul(
                 vec![vec![1, 2, 3], vec![4, 5, 6]],
