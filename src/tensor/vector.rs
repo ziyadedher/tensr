@@ -54,6 +54,33 @@ impl<T, const D0: usize, B: Backend<T>> Tensor for Vector<T, D0, B> {
     }
 }
 
+impl<T, const D0: usize, B: Backend<T>> Vector<T, D0, B> {
+    pub const fn construct_shape(d0: usize) -> (usize,) {
+        (d0,)
+    }
+
+    pub const fn calculate_permute((p0,): (usize,), (d0,): (usize,), i: usize) -> usize {
+        match (p0, i) {
+            (0, 0) => d0,
+            (0, 1) => d0,
+            _ => panic!("improper permute"),
+        }
+    }
+
+    pub fn permute<const P0: usize>(
+        self,
+    ) -> Vector<
+        T,
+        { Self::calculate_permute(Self::construct_shape(P0), Self::construct_shape(D0), 0) },
+        B,
+    > {
+        Vector {
+            repr: self.repr,
+            shape: Self::calculate_permute(Self::construct_shape(P0), Self::construct_shape(D0), 0),
+        }
+    }
+}
+
 impl<T, const D0: usize, B: Backend<T>> Add<Scalar<T, B>> for Vector<T, D0, B>
 where
     T: Add<Output = T> + Copy,

@@ -24,6 +24,58 @@ impl<T, const D: usize, B: Backend<T>> Matrix<T, D, D, B> {
 }
 
 impl<T, const D0: usize, const D1: usize, B: Backend<T>> Matrix<T, D0, D1, B> {
+    pub const fn construct_shape(d0: usize, d1: usize) -> (usize, usize) {
+        (d0, d1)
+    }
+
+    pub const fn calculate_permute(
+        (p0, p1): (usize, usize),
+        (d0, d1): (usize, usize),
+        i: usize,
+    ) -> usize {
+        match (p0, p1, i) {
+            (0, 1, 0) => d0,
+            (0, 1, 1) => d1,
+            (1, 0, 0) => d1,
+            (1, 0, 1) => d0,
+            _ => panic!("improper permute"),
+        }
+    }
+
+    pub fn permute<const P0: usize, const P1: usize>(
+        self,
+    ) -> Matrix<
+        T,
+        {
+            Self::calculate_permute(
+                Self::construct_shape(P0, P1),
+                Self::construct_shape(D0, D1),
+                0,
+            )
+        },
+        {
+            Self::calculate_permute(
+                Self::construct_shape(P0, P1),
+                Self::construct_shape(D0, D1),
+                1,
+            )
+        },
+        B,
+    >
+    where
+        T: From<u8> + Copy,
+    {
+        Matrix {
+            repr: B::matrix_transpose(self.repr),
+            shape: (
+                Self::calculate_permute((P0, P1), (D0, D1), 0),
+                Self::calculate_permute((P0, P1), (D0, D1), 1),
+            ),
+        }
+    }
+}
+
+impl<T, const D0: usize, const D1: usize, B: Backend<T>> Matrix<T, D0, D1, B> {
     pub fn matmul<const OD1: usize>(self, other: Matrix<T, D1, OD1, B>) -> Matrix<T, D0, OD1, B>
     where
         T: Add<Output = T> + Mul<Output = T> + From<u8> + Copy,

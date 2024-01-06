@@ -37,6 +37,12 @@ impl<T, B: Backend<T>> Tensor for Scalar<T, B> {
     }
 }
 
+impl<T, B: Backend<T>> Scalar<T, B> {
+    pub fn permute(self) -> Self {
+        self
+    }
+}
+
 impl<T, B: Backend<T>> Add for Scalar<T, B>
 where
     T: Add<Output = T>,
