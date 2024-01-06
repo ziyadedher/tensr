@@ -4,7 +4,7 @@ use crate::{backend::Backend, tensor::Tensor};
 
 #[derive(Clone, Debug)]
 pub struct Tensor0<T, B: Backend<T>> {
-    pub(crate) repr: B::Tensor0Repr,
+    pub(crate) repr: B::T0Repr,
     pub(crate) shape: <Tensor0<T, B> as Tensor>::Shape,
 }
 
@@ -21,7 +21,7 @@ impl<T, B: Backend<T>> Tensor for Tensor0<T, B> {
         Self::DataType: From<u8> + Copy,
     {
         Self {
-            repr: B::scalar_zero(),
+            repr: B::t0_zero(),
             shape: (),
         }
     }
@@ -31,7 +31,7 @@ impl<T, B: Backend<T>> Tensor for Tensor0<T, B> {
         Self::DataType: From<u8> + Copy,
     {
         Self {
-            repr: B::scalar_one(),
+            repr: B::t0_one(),
             shape: (),
         }
     }
@@ -51,7 +51,7 @@ where
 
     fn add(self, other: Self) -> Self {
         Self {
-            repr: B::scalar_scalar_add(self.repr, other.repr),
+            repr: B::t0_t0_add(self.repr, other.repr),
             shape: (),
         }
     }

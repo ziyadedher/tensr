@@ -7,7 +7,7 @@ use crate::{
 
 #[derive(Clone, Debug)]
 pub struct Tensor2<T, const D0: usize, const D1: usize, B: Backend<T> = AutoSelectBackend> {
-    pub(crate) repr: B::Tensor2Repr,
+    pub(crate) repr: B::T2Repr,
     pub(crate) shape: <Tensor2<T, D0, D1, B> as Tensor>::Shape,
 }
 
@@ -17,7 +17,7 @@ impl<T, const D: usize, B: Backend<T>> Tensor2<T, D, D, B> {
         T: From<u8> + Copy,
     {
         Self {
-            repr: B::matrix_identity(D.into()),
+            repr: B::t2_identity(D.into()),
             shape: (D, D),
         }
     }
@@ -66,7 +66,7 @@ impl<T, const D0: usize, const D1: usize, B: Backend<T>> Tensor2<T, D0, D1, B> {
         T: From<u8> + Copy,
     {
         Tensor2 {
-            repr: B::matrix_transpose(self.repr),
+            repr: B::t2_transpose(self.repr),
             shape: (
                 Self::calculate_permute((P0, P1), (D0, D1), 0),
                 Self::calculate_permute((P0, P1), (D0, D1), 1),
@@ -83,7 +83,7 @@ impl<T, const D0: usize, const D1: usize, B: Backend<T>> Tensor2<T, D0, D1, B> {
         assert_eq!(self.shape.1, other.shape.0);
 
         Tensor2 {
-            repr: B::matmul(self.repr, other.repr),
+            repr: B::t2_t2_matmul(self.repr, other.repr),
             shape: (D0, OD1),
         }
     }
@@ -102,7 +102,7 @@ impl<T, const D0: usize, const D1: usize, B: Backend<T>> Tensor for Tensor2<T, D
         Self::DataType: From<u8> + Copy,
     {
         Self {
-            repr: B::matrix_zeros(D0.into(), D1.into()),
+            repr: B::t2_zeros(D0.into(), D1.into()),
             shape: (D0, D1),
         }
     }
@@ -112,7 +112,7 @@ impl<T, const D0: usize, const D1: usize, B: Backend<T>> Tensor for Tensor2<T, D
         Self::DataType: From<u8> + Copy,
     {
         Self {
-            repr: B::matrix_ones(D0.into(), D1.into()),
+            repr: B::t2_ones(D0.into(), D1.into()),
             shape: (D0, D1),
         }
     }
@@ -126,7 +126,7 @@ where
 
     fn add(self, other: Scalar<T, B>) -> Self {
         Self {
-            repr: B::matrix_scalar_add(self.repr, other.repr),
+            repr: B::t2_t0_add(self.repr, other.repr),
             shape: self.shape,
         }
     }
@@ -144,7 +144,7 @@ where
 
     fn add(self, other: Vector<T, D1, B>) -> Self {
         Self {
-            repr: B::matrix_vector_add(self.repr, other.repr, 1.into()),
+            repr: B::t2_t1_add(self.repr, other.repr, 1.into()),
             shape: self.shape,
         }
     }
@@ -160,7 +160,7 @@ where
         assert_eq!(self.shape, other.shape);
 
         Self {
-            repr: B::matrix_matrix_add(self.repr, other.repr),
+            repr: B::t2_t2_add(self.repr, other.repr),
             shape: self.shape,
         }
     }

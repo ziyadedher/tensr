@@ -7,7 +7,7 @@ use crate::{
 
 #[derive(Clone, Debug)]
 pub struct Tensor1<T, const D0: usize, B: Backend<T> = AutoSelectBackend> {
-    pub(crate) repr: B::Tensor1Repr,
+    pub(crate) repr: B::T1Repr,
     pub(crate) shape: <Tensor1<T, D0, B> as Tensor>::Shape,
 }
 
@@ -19,7 +19,7 @@ impl<T, const D0: usize, B: Backend<T>> Tensor1<T, D0, B> {
         assert_eq!(self.shape, other.shape);
 
         Scalar {
-            repr: B::dot(self.repr, other.repr),
+            repr: B::t1_t1_dot(self.repr, other.repr),
             shape: (),
         }
     }
@@ -38,7 +38,7 @@ impl<T, const D0: usize, B: Backend<T>> Tensor for Tensor1<T, D0, B> {
         Self::DataType: From<u8> + Copy,
     {
         Self {
-            repr: B::vector_zeros(D0.into()),
+            repr: B::t1_zeros(D0.into()),
             shape: D0,
         }
     }
@@ -48,7 +48,7 @@ impl<T, const D0: usize, B: Backend<T>> Tensor for Tensor1<T, D0, B> {
         Self::DataType: From<u8> + Copy,
     {
         Self {
-            repr: B::vector_ones(D0.into()),
+            repr: B::t1_ones(D0.into()),
             shape: D0,
         }
     }
@@ -89,7 +89,7 @@ where
 
     fn add(self, other: Scalar<T, B>) -> Self {
         Self {
-            repr: B::vector_scalar_add(self.repr, other.repr),
+            repr: B::t1_t0_add(self.repr, other.repr),
             shape: D0,
         }
     }
@@ -103,7 +103,7 @@ where
 
     fn add(self, other: Self) -> Self {
         Self {
-            repr: B::vector_vector_add(self.repr, other.repr),
+            repr: B::t1_t1_add(self.repr, other.repr),
             shape: D0,
         }
     }
