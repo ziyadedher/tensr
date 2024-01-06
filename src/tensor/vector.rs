@@ -11,8 +11,8 @@ pub struct Vector<T, const D0: usize, B: Backend<T> = AutoSelectBackend> {
     pub(crate) shape: <Vector<T, D0, B> as Tensor>::Shape,
 }
 
-impl<B: Backend<T>, T, const D0: usize> Vector<T, D0, B> {
-    pub fn dot(self, other: Vector<T, D0, B>) -> Scalar<B, T>
+impl<T, const D0: usize, B: Backend<T>> Vector<T, D0, B> {
+    pub fn dot(self, other: Vector<T, D0, B>) -> Scalar<T, B>
     where
         T: From<u8> + Add<Output = T> + Mul<Output = T>,
     {
@@ -25,7 +25,7 @@ impl<B: Backend<T>, T, const D0: usize> Vector<T, D0, B> {
     }
 }
 
-impl<B: Backend<T>, T, const D0: usize> Tensor for Vector<T, D0, B> {
+impl<T, const D0: usize, B: Backend<T>> Tensor for Vector<T, D0, B> {
     type Shape = usize;
     type DataType = T;
 
@@ -54,13 +54,13 @@ impl<B: Backend<T>, T, const D0: usize> Tensor for Vector<T, D0, B> {
     }
 }
 
-impl<B: Backend<T>, T, const D0: usize> Add<Scalar<B, T>> for Vector<T, D0, B>
+impl<T, const D0: usize, B: Backend<T>> Add<Scalar<T, B>> for Vector<T, D0, B>
 where
     T: Add<Output = T> + Copy,
 {
     type Output = Self;
 
-    fn add(self, other: Scalar<B, T>) -> Self {
+    fn add(self, other: Scalar<T, B>) -> Self {
         Self {
             repr: B::vector_scalar_add(self.repr, other.repr),
             shape: D0,
@@ -68,7 +68,7 @@ where
     }
 }
 
-impl<B: Backend<T>, T, const D0: usize> Add for Vector<T, D0, B>
+impl<T, const D0: usize, B: Backend<T>> Add for Vector<T, D0, B>
 where
     T: Add<Output = T>,
 {
