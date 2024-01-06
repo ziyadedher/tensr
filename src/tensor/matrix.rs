@@ -40,20 +40,9 @@ impl<T, const D0: usize, const D1: usize, B: Backend<T>> Matrix<T, D0, D1, B> {
 impl<T, const D0: usize, const D1: usize, B: Backend<T>> Tensor for Matrix<T, D0, D1, B> {
     type Shape = (usize, usize);
     type DataType = T;
-    type Transpose = Matrix<T, D1, D0, B>;
 
     fn shape(&self) -> Self::Shape {
         self.shape
-    }
-
-    fn transpose(self) -> Self::Transpose
-    where
-        T: From<u8> + Copy,
-    {
-        Matrix {
-            repr: B::matrix_transpose(self.repr),
-            shape: (D1, D0),
-        }
     }
 
     fn zeros() -> Self

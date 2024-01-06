@@ -11,14 +11,9 @@ pub struct Scalar<B: Backend<T>, T> {
 impl<B: Backend<T>, T> Tensor for Scalar<B, T> {
     type Shape = ();
     type DataType = T;
-    type Transpose = Self;
 
     fn shape(&self) -> Self::Shape {
         self.shape
-    }
-
-    fn transpose(self) -> Self {
-        self
     }
 
     fn zeros() -> Self

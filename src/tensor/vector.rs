@@ -28,14 +28,9 @@ impl<B: Backend<T>, T, const D0: usize> Vector<T, D0, B> {
 impl<B: Backend<T>, T, const D0: usize> Tensor for Vector<T, D0, B> {
     type Shape = usize;
     type DataType = T;
-    type Transpose = Self;
 
     fn shape(&self) -> Self::Shape {
         self.shape
-    }
-
-    fn transpose(self) -> Self {
-        self
     }
 
     fn zeros() -> Self

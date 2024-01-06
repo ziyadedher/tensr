@@ -4,12 +4,9 @@ fn main() {
     let a = Matrix::ones();
     let b = Matrix::identity();
     let c = a.matmul(b);
-    let d = c + Matrix::<f32, 2, 2>::identity();
+    let d = c + Matrix::<f32, 3, 3>::identity();
 
-    let v = Vector::ones();
-    let m = Matrix::ones();
-    let r = (m.transpose() + v).transpose();
-    let q = r + d;
-
-    println!("{:?}", q);
+    let e = Matrix::<f32, 3, 5>::ones();
+    // let g = f + Matrix::<f32, 5, 3>::ones();
+    println!("{:?}", e.shape());
 }
