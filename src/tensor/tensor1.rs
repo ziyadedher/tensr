@@ -6,13 +6,13 @@ use crate::{
 };
 
 #[derive(Clone, Debug)]
-pub struct Vector<T, const D0: usize, B: Backend<T> = AutoSelectBackend> {
-    pub(crate) repr: B::VectorRepr,
-    pub(crate) shape: <Vector<T, D0, B> as Tensor>::Shape,
+pub struct Tensor1<T, const D0: usize, B: Backend<T> = AutoSelectBackend> {
+    pub(crate) repr: B::Tensor1Repr,
+    pub(crate) shape: <Tensor1<T, D0, B> as Tensor>::Shape,
 }
 
-impl<T, const D0: usize, B: Backend<T>> Vector<T, D0, B> {
-    pub fn dot(self, other: Vector<T, D0, B>) -> Scalar<T, B>
+impl<T, const D0: usize, B: Backend<T>> Tensor1<T, D0, B> {
+    pub fn dot(self, other: Tensor1<T, D0, B>) -> Scalar<T, B>
     where
         T: From<u8> + Add<Output = T> + Mul<Output = T>,
     {
@@ -25,7 +25,7 @@ impl<T, const D0: usize, B: Backend<T>> Vector<T, D0, B> {
     }
 }
 
-impl<T, const D0: usize, B: Backend<T>> Tensor for Vector<T, D0, B> {
+impl<T, const D0: usize, B: Backend<T>> Tensor for Tensor1<T, D0, B> {
     type Shape = usize;
     type DataType = T;
 
@@ -54,7 +54,7 @@ impl<T, const D0: usize, B: Backend<T>> Tensor for Vector<T, D0, B> {
     }
 }
 
-impl<T, const D0: usize, B: Backend<T>> Vector<T, D0, B> {
+impl<T, const D0: usize, B: Backend<T>> Tensor1<T, D0, B> {
     pub const fn construct_shape(d0: usize) -> (usize,) {
         (d0,)
     }
@@ -69,19 +69,19 @@ impl<T, const D0: usize, B: Backend<T>> Vector<T, D0, B> {
 
     pub fn permute<const P0: usize>(
         self,
-    ) -> Vector<
+    ) -> Tensor1<
         T,
         { Self::calculate_permute(Self::construct_shape(P0), Self::construct_shape(D0), 0) },
         B,
     > {
-        Vector {
+        Tensor1 {
             repr: self.repr,
             shape: Self::calculate_permute(Self::construct_shape(P0), Self::construct_shape(D0), 0),
         }
     }
 }
 
-impl<T, const D0: usize, B: Backend<T>> Add<Scalar<T, B>> for Vector<T, D0, B>
+impl<T, const D0: usize, B: Backend<T>> Add<Scalar<T, B>> for Tensor1<T, D0, B>
 where
     T: Add<Output = T> + Copy,
 {
@@ -95,7 +95,7 @@ where
     }
 }
 
-impl<T, const D0: usize, B: Backend<T>> Add for Vector<T, D0, B>
+impl<T, const D0: usize, B: Backend<T>> Add for Tensor1<T, D0, B>
 where
     T: Add<Output = T>,
 {

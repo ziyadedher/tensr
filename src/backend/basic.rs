@@ -8,53 +8,53 @@ pub struct Backend {}
 impl<T: Clone> BackendTrait<T> for Backend {
     type Index = usize;
     type Dimension = usize;
-    type ScalarRepr = T;
-    type VectorRepr = Vec<T>;
-    type MatrixRepr = Vec<Vec<T>>;
+    type Tensor0Repr = T;
+    type Tensor1Repr = Vec<T>;
+    type Tensor2Repr = Vec<Vec<T>>;
 
-    fn scalar_zero() -> Self::ScalarRepr
+    fn scalar_zero() -> Self::Tensor0Repr
     where
         T: From<u8>,
     {
         0.into()
     }
 
-    fn scalar_one() -> Self::ScalarRepr
+    fn scalar_one() -> Self::Tensor0Repr
     where
         T: From<u8>,
     {
         1.into()
     }
 
-    fn vector_zeros(d0: usize) -> Self::VectorRepr
+    fn vector_zeros(d0: usize) -> Self::Tensor1Repr
     where
         T: From<u8> + Copy,
     {
         vec![0.into(); d0]
     }
 
-    fn vector_ones(d0: usize) -> Self::VectorRepr
+    fn vector_ones(d0: usize) -> Self::Tensor1Repr
     where
         T: From<u8> + Copy,
     {
         vec![1.into(); d0]
     }
 
-    fn matrix_zeros(d0: usize, d1: usize) -> Self::MatrixRepr
+    fn matrix_zeros(d0: usize, d1: usize) -> Self::Tensor2Repr
     where
         T: From<u8> + Copy,
     {
         vec![vec![0.into(); d1]; d0]
     }
 
-    fn matrix_ones(d0: usize, d1: usize) -> Self::MatrixRepr
+    fn matrix_ones(d0: usize, d1: usize) -> Self::Tensor2Repr
     where
         T: From<u8> + Copy,
     {
         vec![vec![1.into(); d1]; d0]
     }
 
-    fn matrix_transpose(a: Self::MatrixRepr) -> Self::MatrixRepr
+    fn matrix_transpose(a: Self::Tensor2Repr) -> Self::Tensor2Repr
     where
         T: From<u8> + Copy,
     {
@@ -67,7 +67,7 @@ impl<T: Clone> BackendTrait<T> for Backend {
         result
     }
 
-    fn matrix_identity(d: usize) -> Self::MatrixRepr
+    fn matrix_identity(d: usize) -> Self::Tensor2Repr
     where
         T: From<u8> + Copy,
     {
@@ -78,21 +78,21 @@ impl<T: Clone> BackendTrait<T> for Backend {
         matrix
     }
 
-    fn scalar_scalar_add(a: Self::ScalarRepr, b: Self::ScalarRepr) -> Self::ScalarRepr
+    fn scalar_scalar_add(a: Self::Tensor0Repr, b: Self::Tensor0Repr) -> Self::Tensor0Repr
     where
         T: Add<Output = T>,
     {
         a + b
     }
 
-    fn vector_scalar_add(a: Self::VectorRepr, b: Self::ScalarRepr) -> Self::VectorRepr
+    fn vector_scalar_add(a: Self::Tensor1Repr, b: Self::Tensor0Repr) -> Self::Tensor1Repr
     where
         T: Add<Output = T> + Copy,
     {
         a.into_iter().map(|a| a + b).collect()
     }
 
-    fn vector_vector_add(a: Self::VectorRepr, b: Self::VectorRepr) -> Self::VectorRepr
+    fn vector_vector_add(a: Self::Tensor1Repr, b: Self::Tensor1Repr) -> Self::Tensor1Repr
     where
         T: Add<Output = T>,
     {
@@ -103,7 +103,7 @@ impl<T: Clone> BackendTrait<T> for Backend {
             .collect()
     }
 
-    fn matrix_scalar_add(a: Self::MatrixRepr, b: Self::ScalarRepr) -> Self::MatrixRepr
+    fn matrix_scalar_add(a: Self::Tensor2Repr, b: Self::Tensor0Repr) -> Self::Tensor2Repr
     where
         T: Add<Output = T> + Copy,
     {
@@ -113,10 +113,10 @@ impl<T: Clone> BackendTrait<T> for Backend {
     }
 
     fn matrix_vector_add(
-        a: Self::MatrixRepr,
-        b: Self::VectorRepr,
+        a: Self::Tensor2Repr,
+        b: Self::Tensor1Repr,
         along: Self::Dimension,
-    ) -> Self::MatrixRepr
+    ) -> Self::Tensor2Repr
     where
         T: Add<Output = T> + Copy,
     {
@@ -138,7 +138,7 @@ impl<T: Clone> BackendTrait<T> for Backend {
         }
     }
 
-    fn matrix_matrix_add(a: Self::MatrixRepr, b: Self::MatrixRepr) -> Self::MatrixRepr
+    fn matrix_matrix_add(a: Self::Tensor2Repr, b: Self::Tensor2Repr) -> Self::Tensor2Repr
     where
         T: Add<Output = T>,
     {
@@ -153,7 +153,7 @@ impl<T: Clone> BackendTrait<T> for Backend {
             .collect()
     }
 
-    fn dot(a: Self::VectorRepr, b: Self::VectorRepr) -> Self::ScalarRepr
+    fn dot(a: Self::Tensor1Repr, b: Self::Tensor1Repr) -> Self::Tensor0Repr
     where
         T: Add<Output = T> + Mul<Output = T> + From<u8>,
     {
@@ -162,7 +162,7 @@ impl<T: Clone> BackendTrait<T> for Backend {
             .fold(0.into(), |acc, (a, b)| acc + a * b)
     }
 
-    fn matmul(a: Self::MatrixRepr, b: Self::MatrixRepr) -> Self::MatrixRepr
+    fn matmul(a: Self::Tensor2Repr, b: Self::Tensor2Repr) -> Self::Tensor2Repr
     where
         T: Add<Output = T> + Mul<Output = T> + From<u8> + Copy,
     {

@@ -6,12 +6,12 @@ use crate::{
 };
 
 #[derive(Clone, Debug)]
-pub struct Matrix<T, const D0: usize, const D1: usize, B: Backend<T> = AutoSelectBackend> {
-    pub(crate) repr: B::MatrixRepr,
-    pub(crate) shape: <Matrix<T, D0, D1, B> as Tensor>::Shape,
+pub struct Tensor2<T, const D0: usize, const D1: usize, B: Backend<T> = AutoSelectBackend> {
+    pub(crate) repr: B::Tensor2Repr,
+    pub(crate) shape: <Tensor2<T, D0, D1, B> as Tensor>::Shape,
 }
 
-impl<T, const D: usize, B: Backend<T>> Matrix<T, D, D, B> {
+impl<T, const D: usize, B: Backend<T>> Tensor2<T, D, D, B> {
     pub fn identity() -> Self
     where
         T: From<u8> + Copy,
@@ -23,7 +23,7 @@ impl<T, const D: usize, B: Backend<T>> Matrix<T, D, D, B> {
     }
 }
 
-impl<T, const D0: usize, const D1: usize, B: Backend<T>> Matrix<T, D0, D1, B> {
+impl<T, const D0: usize, const D1: usize, B: Backend<T>> Tensor2<T, D0, D1, B> {
     pub const fn construct_shape(d0: usize, d1: usize) -> (usize, usize) {
         (d0, d1)
     }
@@ -44,7 +44,7 @@ impl<T, const D0: usize, const D1: usize, B: Backend<T>> Matrix<T, D0, D1, B> {
 
     pub fn permute<const P0: usize, const P1: usize>(
         self,
-    ) -> Matrix<
+    ) -> Tensor2<
         T,
         {
             Self::calculate_permute(
@@ -65,7 +65,7 @@ impl<T, const D0: usize, const D1: usize, B: Backend<T>> Matrix<T, D0, D1, B> {
     where
         T: From<u8> + Copy,
     {
-        Matrix {
+        Tensor2 {
             repr: B::matrix_transpose(self.repr),
             shape: (
                 Self::calculate_permute((P0, P1), (D0, D1), 0),
@@ -75,21 +75,21 @@ impl<T, const D0: usize, const D1: usize, B: Backend<T>> Matrix<T, D0, D1, B> {
     }
 }
 
-impl<T, const D0: usize, const D1: usize, B: Backend<T>> Matrix<T, D0, D1, B> {
-    pub fn matmul<const OD1: usize>(self, other: Matrix<T, D1, OD1, B>) -> Matrix<T, D0, OD1, B>
+impl<T, const D0: usize, const D1: usize, B: Backend<T>> Tensor2<T, D0, D1, B> {
+    pub fn matmul<const OD1: usize>(self, other: Tensor2<T, D1, OD1, B>) -> Tensor2<T, D0, OD1, B>
     where
         T: Add<Output = T> + Mul<Output = T> + From<u8> + Copy,
     {
         assert_eq!(self.shape.1, other.shape.0);
 
-        Matrix {
+        Tensor2 {
             repr: B::matmul(self.repr, other.repr),
             shape: (D0, OD1),
         }
     }
 }
 
-impl<T, const D0: usize, const D1: usize, B: Backend<T>> Tensor for Matrix<T, D0, D1, B> {
+impl<T, const D0: usize, const D1: usize, B: Backend<T>> Tensor for Tensor2<T, D0, D1, B> {
     type Shape = (usize, usize);
     type DataType = T;
 
@@ -118,7 +118,7 @@ impl<T, const D0: usize, const D1: usize, B: Backend<T>> Tensor for Matrix<T, D0
     }
 }
 
-impl<T, const D0: usize, const D1: usize, B: Backend<T>> Add<Scalar<T, B>> for Matrix<T, D0, D1, B>
+impl<T, const D0: usize, const D1: usize, B: Backend<T>> Add<Scalar<T, B>> for Tensor2<T, D0, D1, B>
 where
     T: Add<Output = T> + Copy,
 {
@@ -132,11 +132,11 @@ where
     }
 }
 
-/// FIXME: ideally, we'd be able to add a vector to the matrix even if the final dimensions don't match,
+/// FIXME: ideally, we'd be able to add a vector to the Tensor2 even if the final dimensions don't match,
 /// but we can't do that right now in a way that maintains the type system's safety. So we rely on folks doing
-/// something like `matrix.transpose().add(vector).transpose()` instead.
+/// something like `Tensor2.transpose().add(vector).transpose()` instead.
 impl<T, const D0: usize, const D1: usize, B: Backend<T>> Add<Vector<T, D1, B>>
-    for Matrix<T, D0, D1, B>
+    for Tensor2<T, D0, D1, B>
 where
     T: Add<Output = T> + Copy,
 {
@@ -150,7 +150,7 @@ where
     }
 }
 
-impl<T, const D0: usize, const D1: usize, B: Backend<T>> Add for Matrix<T, D0, D1, B>
+impl<T, const D0: usize, const D1: usize, B: Backend<T>> Add for Tensor2<T, D0, D1, B>
 where
     T: Add<Output = T>,
 {

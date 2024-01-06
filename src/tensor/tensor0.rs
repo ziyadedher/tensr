@@ -3,12 +3,12 @@ use std::ops::Add;
 use crate::{backend::Backend, tensor::Tensor};
 
 #[derive(Clone, Debug)]
-pub struct Scalar<T, B: Backend<T>> {
-    pub(crate) repr: B::ScalarRepr,
-    pub(crate) shape: <Scalar<T, B> as Tensor>::Shape,
+pub struct Tensor0<T, B: Backend<T>> {
+    pub(crate) repr: B::Tensor0Repr,
+    pub(crate) shape: <Tensor0<T, B> as Tensor>::Shape,
 }
 
-impl<T, B: Backend<T>> Tensor for Scalar<T, B> {
+impl<T, B: Backend<T>> Tensor for Tensor0<T, B> {
     type Shape = ();
     type DataType = T;
 
@@ -37,13 +37,13 @@ impl<T, B: Backend<T>> Tensor for Scalar<T, B> {
     }
 }
 
-impl<T, B: Backend<T>> Scalar<T, B> {
+impl<T, B: Backend<T>> Tensor0<T, B> {
     pub fn permute(self) -> Self {
         self
     }
 }
 
-impl<T, B: Backend<T>> Add for Scalar<T, B>
+impl<T, B: Backend<T>> Add for Tensor0<T, B>
 where
     T: Add<Output = T>,
 {

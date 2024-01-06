@@ -1,10 +1,10 @@
-pub mod matrix;
-pub mod scalar;
-pub mod vector;
+pub mod tensor0;
+pub mod tensor1;
+pub mod tensor2;
 
-pub use matrix::Matrix;
-pub use scalar::Scalar;
-pub use vector::Vector;
+pub use tensor0::Tensor0 as Scalar;
+pub use tensor1::Tensor1 as Vector;
+pub use tensor2::Tensor2 as Matrix;
 
 pub trait Tensor {
     type Shape;
